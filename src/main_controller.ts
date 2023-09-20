@@ -26,6 +26,7 @@ import { CustomCommandsManager } from "./custom_commands_manager";
 import { EXT_ID, findLastEvent } from "./utils";
 import { MutlilineMessagesManager } from "./multiline_messages_manager";
 import { ViewportManager } from "./viewport_manager";
+import { StatusColumn } from "./status_column";
 
 interface RequestResponse {
     send(resp: unknown, isError?: boolean): void;
@@ -79,6 +80,7 @@ export class MainController implements vscode.Disposable {
     public customCommandsManager!: CustomCommandsManager;
     public multilineMessagesManager!: MutlilineMessagesManager;
     public viewportManager!: ViewportManager;
+    public statusColumn!: StatusColumn;
 
     public constructor(settings: ControllerSettings) {
         this.settings = settings;
@@ -227,6 +229,9 @@ export class MainController implements vscode.Disposable {
         this.multilineMessagesManager = new MutlilineMessagesManager(this.logger);
         this.disposables.push(this.multilineMessagesManager);
 
+        this.statusColumn = new StatusColumn(this);
+        this.disposables.push(this.statusColumn);
+
         this.logger.debug(`${LOG_PREFIX}: UIAttach`);
         // !Attach after setup of notifications, otherwise we can get blocking call and stuck
         await this.client.uiAttach(this.settings.neovimViewportWidth, 100, {
@@ -275,6 +280,7 @@ export class MainController implements vscode.Disposable {
             this.bufferManager,
             this.viewportManager,
             this.cursorManager,
+            this.statusColumn,
         ];
         const vscodeComandManagers: NeovimCommandProcessable[] = [this.customCommandsManager];
 

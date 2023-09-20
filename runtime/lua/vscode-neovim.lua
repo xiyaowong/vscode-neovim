@@ -1,6 +1,7 @@
 local api = require("vscode-neovim.api")
 local defaults = require("vscode-neovim.defaults")
 local cursor = require("vscode-neovim.cursor")
+require("vscode-neovim.statuscolumn")
 
 local M = {}
 
