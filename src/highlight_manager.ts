@@ -93,6 +93,15 @@ export class HighlightManager implements Disposable, NeovimRedrawProcessable {
                             }
                             continue;
                         }
+
+                        // Remove cells from the statuscolumn
+                        if (col < 20) {
+                            col = 0;
+                            cells.splice(0, 1);
+                        } else {
+                            col -= 20;
+                        }
+
                         const line = editor.document.lineAt(highlightLine).text;
                         const colStart = col + gridOffset.character;
                         const tabSize = editor.options.tabSize as number;
