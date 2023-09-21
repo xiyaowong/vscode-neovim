@@ -31,6 +31,7 @@ export class HighlightManager implements Disposable, NeovimRedrawProcessable {
         for (const [name, ...args] of batch) {
             switch (name) {
                 case "hl_attr_define": {
+                    this.main.client.lua("require'vscode-neovim.highlight'.refresh()");
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     for (const [id, uiAttrs, , info] of args as [
                         number,
