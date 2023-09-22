@@ -1,3 +1,5 @@
+---@diagnostic disable: inject-field
+
 -- Copy global highlights and overrides highlights to the custom namespace, only external buffers use global namespace
 local api = vim.api
 
@@ -38,12 +40,7 @@ local function get_all_hls(ns)
   return api.nvim_get_hl(ns, { link = false })
 end
 
--- local total_time = 0
--- local count = 0
-local function refresh_highlights()
-  -- count = count + 1
-  -- local start = vim.loop.hrtime()
-  -- global defaults
+local function setup_default()
   set_hl(0, "Normal", {})
   set_hl(0, "NormalNC", {})
   set_hl(0, "NormalFloat", {})
@@ -59,34 +56,28 @@ local function refresh_highlights()
   set_hl(0, "CursorLineNr", {})
   -- make cursor visible for plugins that use fake cursor
   set_hl(0, "Cursor", { reverse = true })
+end
 
+local function refresh_highlights() -- Average processing time: 0.8ms.
   local global_hls = get_all_hls(0)
+  local our_hls = get_all_hls(NS)
   for name, attrs in pairs(global_hls) do
     if not overrides[name] then
       if attrs.link then
         attrs = get_hl(name, 0)
       end
-      set_hl(NS, name, attrs)
+      if not (our_hls[name] and vim.deep_equal(our_hls[name], attrs)) then
+        set_hl(NS, name, attrs)
+      end
     end
   end
 
   for name, attrs in pairs(overrides) do
-    set_hl(NS, name, attrs)
+    if not (our_hls[name] and vim.deep_equal(our_hls[name], attrs)) then
+      set_hl(NS, name, attrs)
+    end
   end
-  -- local cost = (vim.loop.hrtime() - start) / 1e6
-  -- total_time = total_time + cost
-  -- print(total_time / count, "ms")
 end
-
--- {{{ called by client
-local refresh_timer
-local function debounced_refresh_highlights()
-  if refresh_timer and refresh_timer:is_active() then
-    refresh_timer:close()
-  end
-  vim.defer_fn(refresh_highlights, 10)
-end
--- }}}
 
 -- {{{ autocmds
 local group = api.nvim_create_augroup("VSCodeNeovimHighlight", { clear = true })
@@ -100,10 +91,22 @@ api.nvim_create_autocmd({ "BufWinEnter", "WinEnter", "FileType" }, {
 })
 api.nvim_create_autocmd({ "VimEnter", "ColorScheme", "Syntax", "FileType" }, {
   group = group,
-  callback = refresh_highlights,
+  callback = function()
+    setup_default()
+    refresh_highlights()
+  end,
 })
 -- }}}
 
-refresh_highlights()
-
-return { refresh = debounced_refresh_highlights }
+return {
+  refresh = (function()
+    -- debounce
+    local refresh_timer
+    return function()
+      if refresh_timer and refresh_timer:is_active() then
+        refresh_timer:close()
+      end
+      refresh_timer = vim.defer_fn(refresh_highlights, 100)
+    end
+  end)(),
+}
