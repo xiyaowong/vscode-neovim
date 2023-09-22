@@ -26,7 +26,7 @@ vim.opt.colorcolumn = nil
 vim.opt.modeline = false
 vim.opt.modelines = 0
 
--- vim.cmd([[syntax on]]) -- controlled by user
+vim.cmd.syntax("on")
 
 -- --------------------- forced global and local critical options -------------------- --
 local function forceoptions(opt)
