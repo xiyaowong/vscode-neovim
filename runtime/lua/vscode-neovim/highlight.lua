@@ -79,15 +79,28 @@ local function refresh_highlights() -- Average processing time: 0.8ms.
   end
 end
 
+local function set_win_hl_ns()
+  local ok, curr_ns, target_ns, vscode_controlled
+  for _, win in ipairs(api.nvim_list_wins()) do
+    local buf = api.nvim_win_get_buf(win)
+
+    ok, curr_ns = pcall(api.nvim_win_get_var, win, "_vscode_hl_ns")
+    curr_ns = ok and curr_ns or 0
+
+    ok, vscode_controlled = pcall(api.nvim_buf_get_var, buf, "vscode_controlled")
+    target_ns = (ok and vscode_controlled) and NS or 0
+
+    if curr_ns ~= target_ns then
+      api.nvim_win_set_hl_ns(win, target_ns)
+    end
+  end
+end
+
 -- {{{ autocmds
 local group = api.nvim_create_augroup("VSCodeNeovimHighlight", { clear = true })
-api.nvim_create_autocmd({ "BufWinEnter", "WinEnter", "FileType" }, {
+api.nvim_create_autocmd({ "BufWinEnter", "BufEnter", "WinEnter", "WinNew", "WinScrolled" }, {
   group = group,
-  callback = function()
-    local ns = vim.b.vscode_controlled and NS or 0
-    vim.w.__vscode_hl_ns = ns -- debug
-    api.nvim_win_set_hl_ns(0, ns)
-  end,
+  callback = set_win_hl_ns,
 })
 api.nvim_create_autocmd({ "VimEnter", "ColorScheme", "Syntax", "FileType" }, {
   group = group,
