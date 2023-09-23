@@ -26,12 +26,13 @@ export class HighlightManager implements Disposable, NeovimRedrawProcessable {
     }
 
     public handleRedrawBatch(batch: [string, ...unknown[]][]): void {
+        let needRefreshHighlights = false;
         const gridHLUpdates: Set<number> = new Set();
 
         for (const [name, ...args] of batch) {
             switch (name) {
                 case "hl_attr_define": {
-                    this.main.client.lua("require'vscode-neovim.highlight'.refresh()");
+                    needRefreshHighlights = true;
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     for (const [id, uiAttrs, , info] of args as [
                         number,
@@ -124,6 +125,11 @@ export class HighlightManager implements Disposable, NeovimRedrawProcessable {
                 }
             }
         }
+
+        if (needRefreshHighlights) {
+            this.main.client.lua("require'vscode-neovim.highlight'.refresh()");
+        }
+
         if (gridHLUpdates.size) {
             this.applyHLGridUpdates(gridHLUpdates);
         }

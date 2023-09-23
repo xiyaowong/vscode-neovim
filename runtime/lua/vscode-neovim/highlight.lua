@@ -5,6 +5,10 @@ local api = vim.api
 
 local NS = api.nvim_create_namespace("-- vscode buffer highlights --")
 
+vim.opt.conceallevel = 0
+vim.g.html_ignore_conceal = 1
+vim.g.vim_json_conceal = 0
+
 -- stylua: ignore start
 local overrides = {
     NonText     = {}, EndOfBuffer  = {}, ErrorMsg       = {}, MoreMsg      = {}, ModeMsg     = {},
@@ -21,62 +25,46 @@ local overrides = {
 }
 -- stylua: ignore end
 
-local function get_hl(name, ns)
-  ns = ns or 0
-  local attrs = api.nvim_get_hl(ns, { name = name, link = false })
-  if ns ~= 0 and attrs.link then
-    return api.nvim_get_hl(0, { name = name, link = false })
-  end
-  return attrs
-end
-
-local function set_hl(ns, name, attrs)
-  ns = ns or 0
-  api.nvim_set_hl(ns, name, attrs)
-end
-
-local function get_all_hls(ns)
-  ns = ns or 0
-  return api.nvim_get_hl(ns, { link = false })
-end
-
 local function setup_default()
-  set_hl(0, "Normal", {})
-  set_hl(0, "NormalNC", {})
-  set_hl(0, "NormalFloat", {})
-  set_hl(0, "NonText", {})
-  set_hl(0, "Visual", {})
-  set_hl(0, "VisualNOS", {})
-  set_hl(0, "Substitute", {})
-  set_hl(0, "Whitespace", {})
-  set_hl(0, "LineNr", {})
-  set_hl(0, "LineNrAbove", {})
-  set_hl(0, "LineNrBelow", {})
-  set_hl(0, "CursorLine", {})
-  set_hl(0, "CursorLineNr", {})
+  api.nvim_set_hl(0, "Normal", {})
+  api.nvim_set_hl(0, "NormalNC", {})
+  api.nvim_set_hl(0, "NormalFloat", {})
+  api.nvim_set_hl(0, "NonText", {})
+  api.nvim_set_hl(0, "Visual", {})
+  api.nvim_set_hl(0, "VisualNOS", {})
+  api.nvim_set_hl(0, "Substitute", {})
+  api.nvim_set_hl(0, "Whitespace", {})
+  api.nvim_set_hl(0, "LineNr", {})
+  api.nvim_set_hl(0, "LineNrAbove", {})
+  api.nvim_set_hl(0, "LineNrBelow", {})
+  api.nvim_set_hl(0, "CursorLine", {})
+  api.nvim_set_hl(0, "CursorLineNr", {})
   -- make cursor visible for plugins that use fake cursor
-  set_hl(0, "Cursor", { reverse = true })
+  api.nvim_set_hl(0, "Cursor", { reverse = true })
 end
 
-local function refresh_highlights() -- Average processing time: 0.8ms.
-  local global_hls = get_all_hls(0)
-  local our_hls = get_all_hls(NS)
+local function refresh_highlights()
+  -- local start = vim.loop.hrtime()
+  vim.g.__c__ = (vim.g.__c__ or 0) + 1
+  local global_hls = api.nvim_get_hl(0, { link = true })
   for name, attrs in pairs(global_hls) do
-    if not overrides[name] then
-      if attrs.link then
-        attrs = get_hl(name, 0)
+    local link = attrs.link
+    local target_attrs
+    if overrides[name] then
+      target_attrs = overrides[name]
+    elseif link then
+      if overrides[link] then
+        target_attrs = overrides[link]
+      else
+        target_attrs = api.nvim_get_hl(0, { name = link, link = false })
       end
-      if not (our_hls[name] and vim.deep_equal(our_hls[name], attrs)) then
-        set_hl(NS, name, attrs)
-      end
+    else
+      target_attrs = attrs
     end
-  end
 
-  for name, attrs in pairs(overrides) do
-    if not (our_hls[name] and vim.deep_equal(our_hls[name], attrs)) then
-      set_hl(NS, name, attrs)
-    end
+    api.nvim_set_hl(NS, name, target_attrs)
   end
+  -- print((vim.loop.hrtime() - start) / 1e6, "ms")
 end
 
 local function set_win_hl_ns()
@@ -120,7 +108,7 @@ return {
       if refresh_timer and refresh_timer:is_active() then
         refresh_timer:close()
       end
-      refresh_timer = vim.defer_fn(refresh_highlights, 100)
+      refresh_timer = vim.defer_fn(refresh_highlights, 300)
     end
   end)(),
 }
