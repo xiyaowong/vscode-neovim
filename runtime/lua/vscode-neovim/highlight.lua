@@ -91,6 +91,7 @@ local function set_win_hl_ns()
     target_ns = (ok and vscode_controlled) and NS or 0
 
     if curr_ns ~= target_ns then
+      api.nvim_win_set_var(win, "_vscode_hl_ns", target_ns)
       api.nvim_win_set_hl_ns(win, target_ns)
     end
   end
