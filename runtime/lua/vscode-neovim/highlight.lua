@@ -9,23 +9,7 @@ vim.opt.conceallevel = 0
 vim.g.html_ignore_conceal = 1
 vim.g.vim_json_conceal = 0
 
--- stylua: ignore start
-local overrides = {
-    NonText     = {}, EndOfBuffer  = {}, ErrorMsg       = {}, MoreMsg      = {}, ModeMsg     = {},
-    Question    = {}, VisualNC     = {}, WarningMsg     = {}, Sign         = {}, SignColumn  = {},
-    ColorColumn = {}, QuickFixLine = {}, MsgSeparator   = {}, MsgArea      = {}, Operator    = {},
-    Delimiter   = {}, Identifier   = {}, SpecialChar    = {}, Number       = {}, Type        = {},
-    String      = {}, Error        = {}, Comment        = {}, Constant     = {}, Special     = {},
-    Statement   = {}, PreProc      = {}, Underlined     = {}, Ignore       = {}, Todo        = {},
-    Character   = {}, Boolean      = {}, Float          = {}, Function     = {}, Conditional = {},
-    Repeat      = {}, Label        = {}, Keyword        = {}, Exception    = {}, Include     = {},
-    Define      = {}, Macro        = {}, PreCondit      = {}, StorageClass = {}, Structure   = {},
-    Typedef     = {}, Tag          = {}, SpecialComment = {}, Debug        = {}, Folded      = {},
-    FoldColumn  = {},
-}
--- stylua: ignore end
-
-local function setup_default()
+local function setup_globals()
   api.nvim_set_hl(0, "Normal", {})
   api.nvim_set_hl(0, "NormalNC", {})
   api.nvim_set_hl(0, "NormalFloat", {})
@@ -43,28 +27,42 @@ local function setup_default()
   api.nvim_set_hl(0, "Cursor", { reverse = true })
 end
 
-local function refresh_highlights()
-  -- local start = vim.loop.hrtime()
-  vim.g.__c__ = (vim.g.__c__ or 0) + 1
-  local global_hls = api.nvim_get_hl(0, { link = true })
-  for name, attrs in pairs(global_hls) do
-    local link = attrs.link
-    local target_attrs
-    if overrides[name] then
-      target_attrs = overrides[name]
-    elseif link then
-      if overrides[link] then
-        target_attrs = overrides[link]
-      else
-        target_attrs = api.nvim_get_hl(0, { name = link, link = false })
-      end
-    else
-      target_attrs = attrs
+-- stylua: ignore start
+local overrides = {
+    NonText     = {}, EndOfBuffer  = {}, ErrorMsg       = {}, MoreMsg      = {}, ModeMsg     = {},
+    Question    = {}, VisualNC     = {}, WarningMsg     = {}, Sign         = {}, SignColumn  = {},
+    ColorColumn = {}, QuickFixLine = {}, MsgSeparator   = {}, MsgArea      = {}, Operator    = {},
+    Delimiter   = {}, Identifier   = {}, SpecialChar    = {}, Number       = {}, Type        = {},
+    String      = {}, Error        = {}, Comment        = {}, Constant     = {}, Special     = {},
+    Statement   = {}, PreProc      = {}, Underlined     = {}, Ignore       = {}, Todo        = {},
+    Character   = {}, Boolean      = {}, Float          = {}, Function     = {}, Conditional = {},
+    Repeat      = {}, Label        = {}, Keyword        = {}, Exception    = {}, Include     = {},
+    Define      = {}, Macro        = {}, PreCondit      = {}, StorageClass = {}, Structure   = {},
+    Typedef     = {}, Tag          = {}, SpecialComment = {}, Debug        = {}, Folded      = {},
+    FoldColumn  = {},
+}
+-- stylua: ignore end
+local overridden = {}
+local function setup_overrides()
+  for name, attrs in pairs(overrides) do
+    if not overridden[name] then
+      overridden[name] = true
+      api.nvim_set_hl(NS, name, attrs)
     end
-
-    api.nvim_set_hl(NS, name, target_attrs)
   end
-  -- print((vim.loop.hrtime() - start) / 1e6, "ms")
+end
+
+local cleared_syntax_groups = {}
+local function setup_syntax_groups()
+  local output = api.nvim_exec2("syntax", { output = true })
+  local items = vim.split(output.output, "\n")
+  for _, item in ipairs(items) do
+    local group = item:match([[([%w@%.]+)%s+xxx]])
+    if group and not cleared_syntax_groups[group] then
+      cleared_syntax_groups[group] = true
+      api.nvim_set_hl(NS, group, {})
+    end
+  end
 end
 
 local function set_win_hl_ns()
@@ -94,21 +92,10 @@ api.nvim_create_autocmd({ "BufWinEnter", "BufEnter", "WinEnter", "WinNew", "WinS
 api.nvim_create_autocmd({ "VimEnter", "ColorScheme", "Syntax", "FileType" }, {
   group = group,
   callback = function()
-    setup_default()
-    refresh_highlights()
+    setup_globals()
+    -- highlights of custom namespace
+    setup_overrides()
+    vim.defer_fn(setup_syntax_groups, 200) -- wait syntax things done
   end,
 })
 -- }}}
-
-return {
-  refresh = (function()
-    -- debounce
-    local refresh_timer
-    return function()
-      if refresh_timer and refresh_timer:is_active() then
-        refresh_timer:close()
-      end
-      refresh_timer = vim.defer_fn(refresh_highlights, 300)
-    end
-  end)(),
-}
