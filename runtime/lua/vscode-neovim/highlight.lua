@@ -99,3 +99,7 @@ api.nvim_create_autocmd({ "VimEnter", "ColorScheme", "Syntax", "FileType" }, {
   end,
 })
 -- }}}
+
+setup_globals()
+setup_overrides()
+setup_syntax_groups()
