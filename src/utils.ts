@@ -40,10 +40,6 @@ export interface DotRepeatChange {
      */
     text: string;
     /**
-     * Set if it was the first change and started either through o or O
-     */
-    startMode?: "o" | "O";
-    /**
      * Text eol
      */
     eol: string;
@@ -311,16 +307,11 @@ export function isCursorChange(change: TextDocumentContentChangeEvent, cursor: P
     return false;
 }
 
-export function normalizeDotRepeatChange(
-    change: TextDocumentContentChangeEvent,
-    eol: string,
-    startMode?: "o" | "O",
-): DotRepeatChange {
+export function normalizeDotRepeatChange(change: TextDocumentContentChangeEvent, eol: string): DotRepeatChange {
     return {
         rangeLength: change.rangeLength,
         rangeOffset: change.rangeOffset,
         text: change.text,
-        startMode,
         eol,
     };
 }

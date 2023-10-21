@@ -584,22 +584,22 @@
                 "args": "<C-a>"
             },
             {
-                "command": "vscode-neovim.ctrl-b",
+                "command": "vscode-neovim.send",
                 "key": "ctrl+b",
                 "when": "editorTextFocus && neovim.init && neovim.mode != insert && neovim.ctrlKeysNormal.b && editorLangId not in neovim.editorLangIdExclusions"
             },
             {
-                "command": "vscode-neovim.ctrl-d",
+                "command": "vscode-neovim.send",
                 "key": "ctrl+d",
                 "when": "editorTextFocus && neovim.init && neovim.mode != insert && neovim.ctrlKeysNormal.d && editorLangId not in neovim.editorLangIdExclusions"
             },
             {
-                "command": "vscode-neovim.ctrl-e",
+                "command": "vscode-neovim.send",
                 "key": "ctrl+e",
                 "when": "editorTextFocus && neovim.init && neovim.mode != insert && neovim.ctrlKeysNormal.e && editorLangId not in neovim.editorLangIdExclusions"
             },
             {
-                "command": "vscode-neovim.ctrl-f",
+                "command": "vscode-neovim.send",
                 "key": "ctrl+f",
                 "when": "editorTextFocus && neovim.init && neovim.mode != insert && neovim.ctrlKeysNormal.f && editorLangId not in neovim.editorLangIdExclusions"
             },

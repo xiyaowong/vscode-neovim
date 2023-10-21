@@ -77,10 +77,6 @@ export class DocumentChangeManager implements Disposable {
      */
     private dotRepeatChange: DotRepeatChange | undefined;
     /**
-     * A hint for dot-repeat indicating of how the insert mode was started
-     */
-    private dotRepeatStartModeInsertHint?: "o" | "O";
-    /**
      * True when we're currently applying edits, so incoming changes will go into pending events queue
      */
     private applyingEdits = false;
@@ -96,13 +92,7 @@ export class DocumentChangeManager implements Disposable {
     public constructor(private main: MainController) {
         this.main.bufferManager.onBufferEvent = this.onNeovimChangeEvent;
         this.main.bufferManager.onBufferInit = this.onBufferInit;
-        this.disposables.push(
-            workspace.onDidChangeTextDocument(this.onChangeTextDocument),
-            eventBus.on("insert-line", ([type]) => {
-                this.dotRepeatStartModeInsertHint = type === "before" ? "O" : "o";
-                logger.debug(`Setting start insert mode hint - ${this.dotRepeatStartModeInsertHint}`);
-            }),
-        );
+        this.disposables.push(workspace.onDidChangeTextDocument(this.onChangeTextDocument));
     }
 
     public dispose(): void {
@@ -170,13 +160,6 @@ export class DocumentChangeManager implements Disposable {
             );
         }
         let editStr = "";
-        if (dotRepeatChange.startMode) {
-            editStr += `<Esc>${dotRepeatChange.startMode}`;
-            // remove EOL from first change
-            if (dotRepeatChange.text.startsWith(dotRepeatChange.eol)) {
-                dotRepeatChange.text = dotRepeatChange.text.slice(dotRepeatChange.eol.length);
-            }
-        }
         editStr += dotRepeatChange.text.split(dotRepeatChange.eol).join("\n");
         edits.push(["nvim_feedkeys", [editStr, "i", false]]);
         if (dotRepeatChange.rangeLength) {
@@ -473,19 +456,17 @@ export class DocumentChangeManager implements Disposable {
         }
 
         const eol = doc.eol === EndOfLine.LF ? "\n" : "\r\n";
-        const startModeHint = this.dotRepeatStartModeInsertHint;
         const activeEditor = window.activeTextEditor;
 
         // Store dot repeat
         if (activeEditor && activeEditor.document === doc && this.main.modeManager.isInsertMode) {
-            this.dotRepeatStartModeInsertHint = undefined;
             const cursor = activeEditor.selection.active;
             for (const change of contentChanges) {
                 if (isCursorChange(change, cursor, eol)) {
                     if (this.dotRepeatChange && isChangeSubsequentToChange(change, this.dotRepeatChange)) {
                         this.dotRepeatChange = accumulateDotRepeatChange(change, this.dotRepeatChange);
                     } else {
-                        this.dotRepeatChange = normalizeDotRepeatChange(change, eol, startModeHint);
+                        this.dotRepeatChange = normalizeDotRepeatChange(change, eol);
                     }
                 }
             }
