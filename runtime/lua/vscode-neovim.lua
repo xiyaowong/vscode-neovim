@@ -6,6 +6,7 @@ local highlight = require("vscode-neovim.highlight")
 local filetype = require("vscode-neovim.filetype")
 local autocmds = require("vscode-neovim.autocmds")
 local sync_options = require("vscode-neovim.sync-options")
+local viewport = require("vscode-neovim.viewport")
 
 default_optons.setup()
 cursor.setup()
@@ -13,6 +14,7 @@ highlight.setup()
 filetype.setup()
 autocmds.setup()
 sync_options.setup()
+viewport.setup()
 
 local vscode = {
   -- actions

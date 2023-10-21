@@ -116,7 +116,7 @@ type EventsMapping = {
     scroll: ["page" | "halfPage", "up" | "down"];
     ["scroll-line"]: ["up" | "down"];
     ["window-scroll"]: [
-        number,
+        number, // winId
         {
             lnum: number;
             col: number;

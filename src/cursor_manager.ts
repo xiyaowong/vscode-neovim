@@ -502,7 +502,6 @@ export class CursorManager implements Disposable {
                     : TextEditorRevealType.Default
                 : TextEditorRevealType.Default;
         editor.revealRange(new Selection(pos, pos), type);
-        this.main.viewportManager.scrollNeovim(editor);
     };
 
     private async handleRangeCommand(data: EventBusData<"range-command">): Promise<unknown> {
