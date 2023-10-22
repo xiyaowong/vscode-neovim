@@ -75,6 +75,33 @@ export class ViewportManager implements Disposable {
         return new Position(view.topline, view.leftcol);
     }
 
+    private syncGridViewports = debounce(
+        async () => {
+            try {
+                const res = await this.client.executeLua(`return require'vscode-neovim.internal'.winsaveviews()`);
+                for (const [winId, winView] of res as [number, any][]) {
+                    const grid = this.main.bufferManager.getGridIdForWinId(winId);
+                    if (grid) {
+                        const view = this.getViewport(grid);
+                        view.topline = winView.topline - 1;
+                        view.line = winView.lnum - 1;
+                        view.col = winView.col;
+                        view.skipcol = winView.skipcol;
+                        view.leftcol = winView.leftcol;
+                    }
+                }
+            } catch {
+                //
+            }
+        },
+        5,
+        {
+            leading: false,
+            trailing: true,
+            maxWait: 10,
+        },
+    );
+
     private handleRedraw(data: EventBusData<"redraw">) {
         for (const { name, args } of data) {
             switch (name) {
@@ -86,6 +113,7 @@ export class ViewportManager implements Disposable {
                         view.line = curline;
                         view.col = curcol;
                     }
+                    this.syncGridViewports();
                     break;
                 }
                 case "grid_destroy": {

@@ -90,4 +90,13 @@ function M.handle_changes(bufnr, changes)
   return api.nvim_buf_get_changedtick(bufnr)
 end
 
+function M.winsaveviews()
+  local wins = api.nvim_list_wins()
+  local views = {}
+  for _, win in ipairs(wins) do
+    table.insert(views, { win, api.nvim_win_call(win, fn.winsaveview) })
+  end
+  return views
+end
+
 return M
