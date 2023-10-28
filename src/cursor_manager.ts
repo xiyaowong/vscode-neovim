@@ -251,8 +251,7 @@ export class CursorManager implements Disposable {
         }
         this.neovimCursorPosition.set(editor, selections[0]);
         if (!selections[0].isEqual(prevSelections[0])) {
-            logger.debug(`The selection was changed, scroll view`);
-            this.triggerMovementFunctions(editor, active);
+            commands.executeCommand("editor.action.wordHighlight.trigger");
         }
 
         this.cursorUpdatePromise.get(editor)?.resolve();
@@ -483,25 +482,6 @@ export class CursorManager implements Disposable {
                 return selections;
             }
         }
-    };
-
-    private triggerMovementFunctions = (editor: TextEditor, pos: Position): void => {
-        commands.executeCommand("editor.action.wordHighlight.trigger");
-
-        const topVisibleLine = Math.min(...editor.visibleRanges.map((r) => r.start.line));
-        const bottomVisibleLine = Math.max(...editor.visibleRanges.map((r) => r.end.line));
-        const deltaLine = pos.line - editor.selection.active.line;
-        const type =
-            deltaLine > 0
-                ? pos.line > bottomVisibleLine + 10
-                    ? TextEditorRevealType.InCenterIfOutsideViewport
-                    : TextEditorRevealType.Default
-                : deltaLine < 0
-                ? pos.line < topVisibleLine - 10
-                    ? TextEditorRevealType.InCenterIfOutsideViewport
-                    : TextEditorRevealType.Default
-                : TextEditorRevealType.Default;
-        editor.revealRange(new Selection(pos, pos), type);
     };
 
     private async handleRangeCommand(data: EventBusData<"range-command">): Promise<unknown> {

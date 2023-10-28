@@ -2,16 +2,17 @@ local M = {}
 
 local api = vim.api
 local fn = vim.fn
+
 local vscode = require("vscode-neovim.api")
+local util = require("vscode-neovim.util")
 
-local function get_viewport(win)
-  return api.nvim_win_call(win, fn.winsaveview)
-end
-
-local function set_viewport(win, viewport)
-  return api.nvim_win_call(win, function()
-    return fn.winrestview(viewport)
-  end)
+function M.get_all_viewports()
+  local wins = api.nvim_list_wins()
+  local views = {}
+  for _, win in ipairs(wins) do
+    table.insert(views, { win, api.nvim_win_call(win, fn.winsaveview) })
+  end
+  return views
 end
 
 ---@class EditorViewport
@@ -28,28 +29,44 @@ end
 ---@param win number
 ---@param view EditorViewport
 local function on_editor_viewport_changed(win, view)
-  ---@type WindowViewport
-  local curr_view = api.nvim_win_call(win, fn.winsaveview)
+  local is_outside = false
+  local topline, botline
+  if view.line <= view.topline then
+    topline = view.line
+    botline = view.botline
+    is_outside = true
+  elseif view.line >= view.botline then
+    topline = view.topline
+    botline = view.line
+    is_outside = true
+  else
+    topline = view.topline
+    botline = view.botline
+  end
 
-  -- local outside = view.line < view.topline or view.line > view.botline
+  if is_outside then
+    return
+  end
 
-  local height = math.max(
-    -- In the viewport
-    view.botline - view.topline,
-    -- On the viewport top
-    view.botline - view.line,
-    -- On the viewport bottom
-    view.line - view.topline
-  ) + 2
+  topline = topline + 1
+  botline = botline + 1
+
+  local height = botline - topline + 1
 
   if height ~= api.nvim_win_get_height(win) then
     api.nvim_win_set_height(win, height)
   end
 
-  if curr_view.topline ~= view.topline then
-    api.nvim_win_set_var(win, '__vscode_viewport_topline', view.topline)
-    set_viewport(win, view)
-  end
+  api.nvim_win_call(win, function()
+    if topline ~= fn.line("w0") then
+      vim.w.__vscode_viewport_topline = topline
+      if api.nvim_get_mode().mode == "n" then
+        fn.winrestview({ topline = topline, lnum = view.line + 1, col = view.col })
+      else
+        fn.winrestview({ topline = topline })
+      end
+    end
+  end)
 end
 
 function M.setup()
@@ -71,14 +88,28 @@ function M.setup()
         end
       end
 
-      local curr_viewport = get_viewport(win)
-      local ok, last_topline = pcall(api.nvim_win_get_var, win, "__vscode_viewport_topline")
-      if not ok or last_topline ~= curr_viewport.topline then
-        api.nvim_win_set_var(win, "__vscode_viewport_topline", curr_viewport)
-        fn.VSCodeExtensionNotify("viewport-changed", win, curr_viewport)
-      end
+      api.nvim_win_call(win, function()
+        local last_topline = vim.w.__vscode_viewport_topline
+        local view = fn.winsaveview()
+        if last_topline ~= view.topline then
+          vim.w.__vscode_viewport_topline = view.topline
+          fn.VSCodeExtensionNotify("viewport-changed", win, view)
+        end
+      end)
     end,
   })
+
+  local scroll_to_bottom = function(key)
+    util.feedkeys(key)
+    local arg = { lineNumber = fn.line(".") - 1, at = "bottom" }
+    vscode.action("revealLine", { args = { arg } })
+  end
+  vim.keymap.set({ "n" }, "zb", function()
+    scroll_to_bottom("zb")
+  end)
+  vim.keymap.set({ "n" }, "z-", function()
+    scroll_to_bottom("z-")
+  end)
 end
 
 return M

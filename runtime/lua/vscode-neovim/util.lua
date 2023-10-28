@@ -16,4 +16,9 @@ function M.get_char_at(line, byte_col)
   end
 end
 
+function M.feedkeys(keys, mode)
+  keys = vim.api.nvim_replace_termcodes(keys, true, true, true)
+  vim.api.nvim_feedkeys(keys, mode or "n", true)
+end
+
 return M
