@@ -41,12 +41,6 @@ ctrlKeys.forEach((k) => {
         "editorLangId not in neovim.editorLangIdExclusions",
     ].join(" && ");
 
-    // scrolling
-    if (["b", "d", "e", "f", "u", "y"].includes(k)) {
-        cmd = `vscode-neovim.ctrl-${k}`;
-        args = null;
-    }
-
     add(key, when, args, cmd);
 });
 
