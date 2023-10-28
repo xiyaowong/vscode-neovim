@@ -24,6 +24,10 @@ vim.opt.colorcolumn = nil
 
 -- --------------------- forced global and local critical options -------------------- --
 local function forceoptions(opt)
+  -- This will disrupt the adjustment of the viewport.
+  opt.scrolloff = 0
+  opt.sidescrolloff = 0
+
   opt.wrap = false
   opt.conceallevel = 0
   opt.hidden = true

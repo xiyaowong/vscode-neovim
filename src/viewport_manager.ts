@@ -1,5 +1,16 @@
 import { DebouncedFunc, debounce } from "lodash-es";
-import { Disposable, Position, TextEditor, TextEditorVisibleRangesChangeEvent, window, workspace } from "vscode";
+import {
+    Disposable,
+    Position,
+    Range,
+    TextEditor,
+    TextEditorRevealType,
+    TextEditorSelectionChangeEvent,
+    TextEditorVisibleRangesChangeEvent,
+    commands,
+    window,
+    workspace,
+} from "vscode";
 
 import { config } from "./config";
 import { EventBusData, eventBus } from "./eventBus";
@@ -9,6 +20,17 @@ import { disposeAll, convertEditorPositionToVimPosition } from "./utils";
 import actions from "./actions";
 
 const logger = createLogger("ViewportManager");
+
+export interface WinViewport {
+    lnum: number; // 1
+    col: number;
+    coladd: number;
+    curswant: number;
+    topline: number; // 1
+    topfill: number;
+    leftcol: number;
+    skipcol: number;
+}
 
 // All 0-indexed
 interface EditorViewport {
@@ -29,20 +51,24 @@ interface GridViewport {
 }
 
 function getViewportFromEditor(editor: TextEditor): EditorViewport {
-    const { selection, visibleRanges } = editor;
+    const { selection, visibleRanges, document } = editor;
     const pos = convertEditorPositionToVimPosition(editor, selection.active);
-    const view: EditorViewport = {
-        line: pos.line,
-        col: pos.character,
-        topline: visibleRanges[0].start.line,
-        botline: visibleRanges[visibleRanges.length - 1].end.line,
-    };
+    const { line, character: col } = pos;
+    const topline = visibleRanges[0].start.line;
+    const botline = Math.min(
+        document.lineCount - 1,
+        // Generally 1-2 lines less than the actual range
+        visibleRanges[visibleRanges.length - 1].end.line,
+    );
+    const view = { line, col, topline, botline };
     console.log(JSON.stringify(view));
     return view;
 }
 
 export class ViewportManager implements Disposable {
     private disposables: Disposable[] = [];
+
+    private editorRevealLine: WeakMap<TextEditor, number> = new WeakMap();
 
     /**
      * Current grid viewport, indexed by grid
@@ -54,35 +80,54 @@ export class ViewportManager implements Disposable {
     }
 
     public constructor(private main: MainController) {
-        const fireViewportChanged = (editor: TextEditor) => {
-            if (this.main.modeManager.isInsertMode) return;
-            const winId = this.main.bufferManager.getWinIdForTextEditor(editor);
-            if (!winId) return;
-            actions.fireNvimEvent("editor-viewport-changed", winId, getViewportFromEditor(editor));
-        };
-        const debouncedMap = {
-            20: debounce(fireViewportChanged, 20),
-            60: debounce(fireViewportChanged, 60),
-        };
-
-        window.onDidChangeTextEditorSelection((e) => debouncedMap[config.useSmoothScrolling ? 60 : 20](e.textEditor));
-        window.onDidChangeTextEditorVisibleRanges((e) =>
-            debouncedMap[config.useSmoothScrolling ? 60 : 20](e.textEditor),
-        );
-
         this.disposables.push(
-            // window.onDidChangeTextEditorVisibleRanges(this.onDidChangeVisibleRange),
+            window.onDidChangeTextEditorSelection(this.alignVisibleTopLine),
+            window.onDidChangeTextEditorVisibleRanges(this.alignVisibleTopLine),
+            window.onDidChangeTextEditorSelection(this.sendEditorViewport),
+            window.onDidChangeTextEditorVisibleRanges(this.sendEditorViewport),
+
             eventBus.on("redraw", this.handleRedraw, this),
-            eventBus.on("window-scroll", ([winId, saveView]) => {
-                const gridId = this.main.bufferManager.getGridIdForWinId(winId);
-                if (gridId) {
-                    const view = this.getViewport(gridId);
-                    view.leftcol = saveView.leftcol;
-                    view.skipcol = saveView.skipcol;
-                }
-            }),
+            eventBus.on("viewport-changed", this.handleWinViewportChanged),
         );
     }
+
+    private handleWinViewportChanged = ([winId, saveView]: [number, WinViewport]) => {
+        const gridId = this.main.bufferManager.getGridIdForWinId(winId);
+        if (gridId) {
+            console.log(`viewport changed: ${winId} => ${JSON.stringify(saveView)}`);
+            const view = this.getViewport(gridId);
+            view.line = saveView.lnum - 1;
+            view.col = saveView.col;
+            view.topline = saveView.topline - 1;
+            view.leftcol = saveView.leftcol;
+            view.skipcol = saveView.skipcol;
+        }
+    };
+
+    private _sendEditorViewPort = (e: TextEditorVisibleRangesChangeEvent | TextEditorSelectionChangeEvent) => {
+        if (this.main.modeManager.isInsertMode) return;
+        const editor = e.textEditor;
+        const winId = this.main.bufferManager.getWinIdForTextEditor(editor);
+        if (!winId) return;
+        actions.fireNvimEvent("editor_viewport_changed", winId, getViewportFromEditor(editor));
+    };
+    private sendEditorViewport = debounce(this._sendEditorViewPort, 100);
+
+    // Scrolling using the mouse or dragging the scrollbar scrolls by pixels
+    private _alignVisibleTopLine = (e: TextEditorVisibleRangesChangeEvent | TextEditorSelectionChangeEvent) => {
+        const editor = e.textEditor;
+        const { visibleRanges } = editor;
+        const topline = visibleRanges[0].start.line;
+        const lastRevealLine = this.editorRevealLine.get(editor) ?? -1;
+        if (lastRevealLine !== topline && topline > 1) {
+            console.log(`Reveal line: ${topline}`);
+            this.editorRevealLine.set(editor, topline);
+            if (window.activeTextEditor === editor)
+                commands.executeCommand("revealLine", { lineNumber: topline, at: "top" });
+            else editor.revealRange(new Range(topline, 0, topline, 0), TextEditorRevealType.AtTop);
+        }
+    };
+    private alignVisibleTopLine = debounce(this._alignVisibleTopLine, 50);
 
     /**
      * Get viewport data

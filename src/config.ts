@@ -32,7 +32,7 @@ export class Config implements Disposable {
     ].map((c) => `${this.root}.${c}`);
 
     // editor.smoothScrolling
-    public useSmoothScrolling = false;
+    private _useSmoothScrolling = false;
 
     dispose() {
         disposeAll(this.disposables);
@@ -44,7 +44,7 @@ export class Config implements Disposable {
     }
 
     private onConfigurationChanged(e?: ConfigurationChangeEvent) {
-        this.useSmoothScrolling = workspace.getConfiguration("editor").get("smoothScrolling", false);
+        this._useSmoothScrolling = workspace.getConfiguration("editor").get("smoothScrolling", false);
 
         this.cfg = workspace.getConfiguration(this.root);
         VSCodeContext.set(`neovim.editorLangIdExclusions`, this.editorLangIdExclusions);
@@ -173,6 +173,9 @@ export class Config implements Disposable {
     }
     get disableMouseSelection() {
         return this.mouseSelectionDebounceTime === 0;
+    }
+    get useSmoothScrolling(): boolean {
+        return this._useSmoothScrolling;
     }
 }
 

@@ -2,6 +2,8 @@
 import neovim from "neovim";
 import { Disposable, EventEmitter } from "vscode";
 
+import { WinViewport } from "./viewport_manager";
+
 // #region RedrawEventArgs
 interface IRedrawEventArg<N, A extends unknown[] = []> {
     name: N;
@@ -115,21 +117,10 @@ type EventsMapping = {
     ["move-cursor"]: ["top" | "middle" | "bottom"];
     scroll: ["page" | "halfPage", "up" | "down"];
     ["scroll-line"]: ["up" | "down"];
-    ["window-scroll"]: [
-        number, // winId
-        {
-            lnum: number;
-            col: number;
-            coladd: number;
-            curswant: number;
-            topline: number;
-            topfill: number;
-            leftcol: number;
-            skipcol: number;
-        },
-    ];
+    ["window-scrolled"]: [number];
     ["visual-changed"]: [number];
     ["range-command"]: any;
+    ["viewport-changed"]: [number, WinViewport];
 };
 
 export interface Event<T extends keyof EventsMapping = keyof EventsMapping> {
