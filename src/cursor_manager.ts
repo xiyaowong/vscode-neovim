@@ -319,36 +319,25 @@ export class CursorManager implements Disposable {
     ): Promise<void> => {
         // reset cursor style if needed
         this.updateCursorStyle(this.main.modeManager.currentMode.name);
-
         // wait for possible layout updates first
-        logger.debug(`Waiting for possible layout completion operation`);
         await this.main.bufferManager.waitForLayoutSync();
         // wait for possible change document events
-        logger.debug(`Waiting for possible document change completion operation`);
         await this.main.changeManager.getDocumentChangeCompletionLock(editor.document);
-        logger.debug(`Waiting done`);
-
         // ignore selection change caused by buffer edit
         const selection = editor.selection;
-        const documentChange = this.main.changeManager.eatDocumentCursorAfterChange(editor.document);
-        if (documentChange && documentChange.isEqual(selection.active)) {
-            logger.debug(`Skipping onSelectionChanged event since it was selection produced by doc change`);
-        } else {
-            logger.debug(
-                `Applying changed selection, kind: ${kind},  cursor: [${selection.active.line}, ${
-                    selection.active.character
-                }], isMultiSelection: ${editor.selections.length > 1}`,
-            );
-
-            if (selection.isEmpty) {
-                // exit visual mode when clicking elsewhere
-                if (this.main.modeManager.isVisualMode && kind == TextEditorSelectionChangeKind.Mouse)
-                    await this.client.input("<Esc>");
-                await this.updateNeovimCursorPosition(editor, selection.active);
-            } else {
-                if (kind != TextEditorSelectionChangeKind.Mouse || !config.disableMouseSelection)
-                    await this.updateNeovimVisualSelection(editor, selection);
-            }
+        const { active } = selection;
+        logger.debug(
+            `Applying changed selection, kind: ${kind},  cursor: [${active.line}, ${
+                active.character
+            }], isMultiSelection: ${editor.selections.length > 1}`,
+        );
+        if (selection.isEmpty) {
+            // exit visual mode when clicking elsewhere
+            if (this.main.modeManager.isVisualMode && kind == TextEditorSelectionChangeKind.Mouse)
+                await this.client.call("visualmode", [1]);
+            await this.updateNeovimCursorPosition(editor, selection.active);
+        } else if (kind != TextEditorSelectionChangeKind.Mouse || !config.disableMouseSelection) {
+            await this.updateNeovimVisualSelection(editor, selection);
         }
 
         this.previousApplyDebounceTime = undefined;
@@ -382,7 +371,7 @@ export class CursorManager implements Disposable {
             // 2. The output is a textEditor, but it cannot accept input, it's meaningless to use the extension.
             // In the output, going out-of-sync and cursor position errors are not significant.
             if (editor.document.uri.scheme !== "output") {
-                logger.error(`${(e as Error).message}`);
+                logger.error((e as Error).message);
             }
         }
     }

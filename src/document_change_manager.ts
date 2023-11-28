@@ -57,10 +57,6 @@ export class DocumentChangeManager implements Disposable {
      */
     private textDocumentChangePromise: Map<TextDocument, Array<ManualPromise>> = new Map();
     /**
-     * Stores cursor pos after document change in neovim
-     */
-    private cursorAfterTextDocumentChange: WeakMap<TextDocument, Position> = new WeakMap();
-    /**
      * Holds document content last known to neovim.
      * ! This is used to convert vscode ranges to neovim bytes.
      * ! It's possible to just fetch content from neovim and check instead of tracking here, but this will add unnecessary lag
@@ -93,22 +89,12 @@ export class DocumentChangeManager implements Disposable {
         disposeAll(this.disposables);
     }
 
-    public eatDocumentCursorAfterChange(doc: TextDocument): Position | undefined {
-        const cursor = this.cursorAfterTextDocumentChange.get(doc);
-        this.cursorAfterTextDocumentChange.delete(doc);
-        return cursor;
-    }
-
     public async getDocumentChangeCompletionLock(doc: TextDocument): Promise<void> {
         const promises = this.textDocumentChangePromise.get(doc);
         if (!promises || !promises.length) {
             return;
         }
         await Promise.all(promises.map((p) => p.promise).filter(Boolean));
-    }
-
-    public hasDocumentChangeCompletionLock(doc: TextDocument): boolean {
-        return (this.textDocumentChangePromise.get(doc)?.length || 0) > 0;
     }
 
     public async syncDotRepeatWithNeovim(): Promise<void> {
@@ -281,7 +267,6 @@ export class DocumentChangeManager implements Disposable {
                             // indepent of the diff operation in question.
                             editor.selections = [new Selection(cursorBefore, cursorBefore)];
                         }
-                        this.cursorAfterTextDocumentChange.set(editor.document, editor.selection.active);
                         docPromises.forEach((p) => p.resolve && p.resolve());
                         logger.debug(`Changes succesfully applied for ${doc.uri.toString()}`);
                         this.documentContentInNeovim.set(doc, doc.getText());
