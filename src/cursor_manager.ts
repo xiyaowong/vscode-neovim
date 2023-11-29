@@ -272,11 +272,6 @@ export class CursorManager implements Disposable {
             `onSelectionChanged, kind: ${kind}, editor: ${textEditor.document.uri.fsPath}, active: [${textEditor.selection.active.line}, ${textEditor.selection.active.character}]`,
         );
 
-        // when dragging mouse, pre-emptively hide cursor to not clash with fake cursor
-        if (kind === TextEditorSelectionChangeKind.Mouse && !textEditor.selection.isEmpty) {
-            this.updateCursorStyle("visual");
-        }
-
         // Why no wait when selection is empty?
         // 1. Waiting during cursor movement causes lag, especially in nvim with "cursorMove" command.
         // 2. Issues may arise only when selected region changes, needing visual selection sync in nvim.
