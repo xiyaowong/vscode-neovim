@@ -316,36 +316,20 @@ export class CursorManager implements Disposable {
     public applySelectionChanged = async (editor: TextEditor, kind?: TextEditorSelectionChangeKind): Promise<void> => {
         // reset cursor style if needed
         this.updateCursorStyle(this.main.modeManager.currentMode.name);
-
         // wait for possible layout updates first
-        logger.debug(`Waiting for possible layout completion operation`);
         await this.main.bufferManager.waitForLayoutSync();
         // wait for possible change document events
-        logger.debug(`Waiting for possible document change completion operation`);
         await this.main.changeManager.getDocumentChangeCompletionLock(editor.document);
-        logger.debug(`Waiting done`);
-
-        // ignore selection change caused by buffer edit
         const selection = editor.selection;
-        const documentChange = this.main.changeManager.eatDocumentCursorAfterChange(editor.document);
-        if (documentChange && documentChange.isEqual(selection.active)) {
-            logger.debug(`Skipping onSelectionChanged event since it was selection produced by doc change`);
-        } else {
-            logger.debug(
-                `Applying changed selection, kind: ${kind},  cursor: [${selection.active.line}, ${
-                    selection.active.character
-                }], isMultiSelection: ${editor.selections.length > 1}`,
-            );
-
-            if (selection.isEmpty) {
-                // exit visual mode when clicking elsewhere
-                if (this.main.modeManager.isVisualMode && kind == TextEditorSelectionChangeKind.Mouse)
-                    await this.client.input("<Esc>");
-                await this.updateNeovimCursorPosition(editor, selection.active);
-            } else {
-                if (kind != TextEditorSelectionChangeKind.Mouse || !config.disableMouseSelection)
-                    await this.updateNeovimVisualSelection(editor, selection);
-            }
+        const { active } = selection;
+        logger.debug(`Applying changed selection, cursor: [${active.line}, ${active.character}]`);
+        if (selection.isEmpty) {
+            // exit visual mode when clicking elsewhere
+            if (this.main.modeManager.isVisualMode && kind == TextEditorSelectionChangeKind.Mouse)
+                await this.client.input("<Esc>");
+            await this.updateNeovimCursorPosition(editor, selection.active);
+        } else if (kind != TextEditorSelectionChangeKind.Mouse || !config.disableMouseSelection) {
+            await this.updateNeovimVisualSelection(editor, selection);
         }
 
         this.previousApplyDebounceTime = undefined;
