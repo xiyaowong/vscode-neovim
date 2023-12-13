@@ -9,7 +9,7 @@ import { transports as loggerTransports, createLogger as winstonCreateLogger } f
 
 import actions from "./actions";
 import { BufferManager } from "./buffer_manager";
-import { CommandLineManager } from "./command_line_manager";
+import { CmdlineManager } from "./cmdline_manager";
 import { CommandsController } from "./commands_controller";
 import { config } from "./config";
 import { CursorManager } from "./cursor_manager";
@@ -55,7 +55,7 @@ export class MainController implements vscode.Disposable {
     public typingManager!: TypingManager;
     public cursorManager!: CursorManager;
     public commandsController!: CommandsController;
-    public commandLineManager!: CommandLineManager;
+    public cmdlineManager!: CmdlineManager;
     public statusLineManager!: StatusLineManager;
     public highlightManager!: HighlightManager;
     public multilineMessagesManager!: MultilineMessagesManager;
@@ -118,7 +118,7 @@ export class MainController implements vscode.Disposable {
             (this.commandsController = new CommandsController(this)),
             (this.highlightManager = new HighlightManager(this)),
             (this.changeManager = new DocumentChangeManager(this)),
-            (this.commandLineManager = new CommandLineManager(this)),
+            (this.cmdlineManager = new CmdlineManager(this)),
             (this.statusLineManager = new StatusLineManager(this)),
             (this.multilineMessagesManager = new MultilineMessagesManager()),
         );

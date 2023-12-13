@@ -135,6 +135,11 @@ type EventsMapping = {
         },
     ];
     ["visual-changed"]: [number];
+
+    ["cmdline_show"]: [string];
+    ["cmdline_hide"]: undefined;
+    ["cmdline_changed"]: [string];
+    ["cmdline_items"]: [string[]];
 };
 
 export interface Event<T extends keyof EventsMapping = keyof EventsMapping> {

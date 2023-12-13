@@ -34,6 +34,7 @@ export class CommandLineManager implements Disposable {
         for (const { name, args } of data) {
             switch (name) {
                 case "cmdline_show": {
+                    console.log("cmdline_show", JSON.stringify(args));
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const [content, pos, firstc, prompt, indent, level] = args[0];
                     const allContent = content.map(([, str]) => str).join("");

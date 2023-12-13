@@ -62,4 +62,15 @@ function M.compare_position(a, b)
   return -1
 end
 
+
+---@return fun(...)
+function M.debounce(func, time)
+  local timer
+  return function(...)
+    local args = { ... }
+    if timer and timer:is_active() then timer:close() end
+    timer = vim.defer_fn(function() func(unpack(args)) end, time)
+  end
+end
+
 return M
