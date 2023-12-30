@@ -204,9 +204,6 @@ export function isChangeSubsequentToChange(
 }
 
 export function isCursorChange(change: TextDocumentContentChangeEvent, cursor: Position, eol: string): boolean {
-    if (change.range.contains(cursor)) {
-        return true;
-    }
     if (change.range.isSingleLine && change.text) {
         const lines = change.text.split(eol);
         const lineLength = lines.length;
