@@ -36,7 +36,10 @@ import {
  * can be combined, like no - normal operator
  */
 
-export async function wait(timeout = 400): Promise<void> {
+/**
+ * @param timeout recommended values are 200, 300
+ */
+export async function wait(timeout = 200): Promise<void> {
     await new Promise((res) => setTimeout(res, timeout));
 }
 
@@ -135,16 +138,16 @@ export function hasVSCodeCursorStyle(style: "block" | "underline" | "line", edit
     }
 }
 
-export async function sendVSCodeCommand(command: string, args: unknown = "", waitTimeout = 400): Promise<void> {
+export async function sendVSCodeCommand(command: string, args: unknown = "", waitTimeout = 100): Promise<void> {
     await commands.executeCommand(command, args);
     await wait(waitTimeout);
 }
 
-export async function sendVSCodeKeysAtomic(keys: string, waitTimeout = 200): Promise<void> {
+export async function sendVSCodeKeysAtomic(keys: string, waitTimeout = 100): Promise<void> {
     await sendVSCodeCommand("type", { text: keys }, waitTimeout);
 }
 
-export async function sendVSCodeKeys(keys: string, waitTimeout = 200): Promise<void> {
+export async function sendVSCodeKeys(keys: string, waitTimeout = 100): Promise<void> {
     let key = "";
     let append = false;
     for (const k of keys) {
@@ -155,18 +158,18 @@ export async function sendVSCodeKeys(keys: string, waitTimeout = 200): Promise<v
             append = false;
         }
         if (!append) {
-            await sendVSCodeKeysAtomic(key, "iaAIoO.:".includes(k) ? 300 : 50);
+            await sendVSCodeKeysAtomic(key, "iaAIoO.:".includes(k) ? 200 : 50);
         }
     }
     await wait(waitTimeout);
 }
 
-export async function sendNeovimKeys(client: NeovimClient, keys: string, waitTimeout = 500): Promise<void> {
+export async function sendNeovimKeys(client: NeovimClient, keys: string, waitTimeout = 100): Promise<void> {
     await client.input(keys);
     await wait(waitTimeout);
 }
 
-export async function sendEscapeKey(timeout = 400): Promise<void> {
+export async function sendEscapeKey(timeout = 200): Promise<void> {
     await commands.executeCommand("vscode-neovim.escape");
     while (!hasVSCodeCursorStyle("block")) {
         await wait(50);
@@ -174,7 +177,7 @@ export async function sendEscapeKey(timeout = 400): Promise<void> {
     await wait(timeout);
 }
 
-export async function sendInsertKey(key = "i", timeout = 300): Promise<void> {
+export async function sendInsertKey(key = "i", timeout = 100): Promise<void> {
     await sendVSCodeKeys(key, 0);
     while (!hasVSCodeCursorStyle("line")) {
         await wait(50);
@@ -312,7 +315,7 @@ export async function assertContent(
     }
 }
 
-export async function setSelection(selection: Selection, waitTimeout = 400, editor?: TextEditor): Promise<void> {
+export async function setSelection(selection: Selection, waitTimeout = 100, editor?: TextEditor): Promise<void> {
     if (!editor) {
         editor = window.activeTextEditor;
     }
@@ -324,7 +327,7 @@ export async function setSelection(selection: Selection, waitTimeout = 400, edit
     await wait(waitTimeout);
 }
 
-export async function setCursor(line: number, char: number, waitTimeout = 400, editor?: TextEditor): Promise<void> {
+export async function setCursor(line: number, char: number, waitTimeout = 100, editor?: TextEditor): Promise<void> {
     await setSelection(new Selection(line, char, line, char), waitTimeout, editor);
 }
 

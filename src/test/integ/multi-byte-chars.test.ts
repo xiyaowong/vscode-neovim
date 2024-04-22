@@ -41,7 +41,7 @@ describe("Multi-width characters", () => {
             client,
         );
 
-        await sendVSCodeKeys("x", 500);
+        await sendVSCodeKeys("x");
         await assertContent(
             {
                 content: ["测试服务", "", "没办法跳转到最后一个"],

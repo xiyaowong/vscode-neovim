@@ -61,7 +61,7 @@ describe("Macros", () => {
             client,
         );
 
-        await sendVSCodeKeys("2@a", 500);
+        await sendVSCodeKeys("2@a");
         await assertContent(
             {
                 content: ["a1", "b1", "c1"],
@@ -126,7 +126,7 @@ describe("Macros", () => {
             client,
         );
 
-        await sendVSCodeKeys("2@a", 1000);
+        await sendVSCodeKeys("2@a");
         await assertContent(
             {
                 content: ["a", "test", "test", "test", "b", "c"],
@@ -135,8 +135,8 @@ describe("Macros", () => {
             client,
         );
 
-        await sendVSCodeKeys("qa", 200);
-        await sendInsertKey("O", 500);
+        await sendVSCodeKeys("qa");
+        await sendInsertKey("O");
         await sendVSCodeKeys("blah");
         await sendEscapeKey();
         await sendVSCodeKeys("q");
@@ -148,7 +148,7 @@ describe("Macros", () => {
             client,
         );
 
-        await sendVSCodeKeys("2@a", 1000);
+        await sendVSCodeKeys("2@a");
         await assertContent(
             {
                 content: ["a", "test", "test", "blah", "blah", "blah", "test", "b", "c"],

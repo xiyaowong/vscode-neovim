@@ -53,7 +53,7 @@ describe("Undo", () => {
             client,
         );
 
-        await sendVSCodeKeys("u", 500);
+        await sendVSCodeKeys("u");
         await assertContent(
             {
                 content: ["some line", "otherline", "blah"],
@@ -177,9 +177,9 @@ describe("Undo", () => {
             content: ["2"].join("\n"),
         });
         await vscode.window.showTextDocument(doc1, vscode.ViewColumn.One);
-        await wait(500);
+        await wait(200);
         await vscode.window.showTextDocument(doc2, vscode.ViewColumn.One);
-        await wait(500);
+        await wait(200);
         await assertContent({ content: ["2"] }, client);
         await sendInsertKey("A");
         await sendVSCodeKeys("test");
@@ -187,7 +187,6 @@ describe("Undo", () => {
         await assertContent({ content: ["2test"] }, client);
         await sendVSCodeKeys("gT");
         await sendVSCodeKeys("gt");
-        await wait(500);
         await sendVSCodeKeys("u");
         await assertContent({ content: ["2"] }, client);
     });

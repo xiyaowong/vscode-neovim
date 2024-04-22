@@ -34,7 +34,7 @@ describe("Dot-repeat", () => {
         await sendVSCodeKeys("123");
         await sendEscapeKey();
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["123123abc"],
@@ -49,7 +49,7 @@ describe("Dot-repeat", () => {
         await sendInsertKey("A");
         await sendVSCodeKeys("12\n3");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["abc12", "312", "3"],
@@ -64,7 +64,7 @@ describe("Dot-repeat", () => {
         await sendInsertKey("A");
         await sendVSCodeKeys("\n123");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["abc", "123", "123"],
@@ -81,7 +81,7 @@ describe("Dot-repeat", () => {
         await sendVSCodeSpecialKey("backspace");
         await sendVSCodeSpecialKey("backspace");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["abc11"],
@@ -116,7 +116,7 @@ describe("Dot-repeat", () => {
         await sendVSCodeSpecialKey("backspace");
         await sendVSCodeSpecialKey("backspace");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["ab"],
@@ -134,7 +134,7 @@ describe("Dot-repeat", () => {
         await sendVSCodeSpecialKey("backspace");
         await sendVSCodeSpecialKey("backspace");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["abc"],
@@ -151,7 +151,7 @@ describe("Dot-repeat", () => {
         await sendVSCodeSpecialKey("backspace");
         await sendVSCodeSpecialKey("backspace");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["1abcbabc"],
@@ -170,7 +170,7 @@ describe("Dot-repeat", () => {
         await pasteVSCode();
         await sendVSCodeSpecialKey("backspace");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["ababcab"],
@@ -189,7 +189,7 @@ describe("Dot-repeat", () => {
         await pasteVSCode();
         await sendVSCodeSpecialKey("backspace");
         await sendEscapeKey();
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["1abc", "2abc1abc", "1abc", "2ab2ab"],
@@ -206,7 +206,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
 
         await sendVSCodeKeys("0ggll");
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1", "blah", "test2", "blah", "test3"],
@@ -215,12 +215,12 @@ describe("Dot-repeat", () => {
         );
 
         await sendVSCodeKeys("0ggj");
-        await sendInsertKey("O", 500); // delay to fix flaky test
+        await sendInsertKey("O"); // delay to fix flaky test
         await sendVSCodeKeys("blah2");
         await sendEscapeKey();
 
         await sendVSCodeKeys("0ggll");
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["blah2", "test1", "blah2", "blah", "test2", "blah", "test3"],
@@ -238,7 +238,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0jll");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["tenew wordst1", "tenew wordst2"],
@@ -254,7 +254,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1()", "test2()"],
@@ -270,7 +270,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1(blah)", "test2(blah)"],
@@ -286,7 +286,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1(blah{blah2})", "test2(blah{blah2})"],
@@ -302,7 +302,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1((blah))", "test2((blah))"],
@@ -318,7 +318,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1({blah})", "test2({blah})"],
@@ -336,7 +336,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1blah", "test2blah"],
@@ -356,7 +356,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1blah", "test2blah"],
@@ -375,7 +375,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1blah", "test2blah"],
@@ -396,7 +396,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1blah", "test2blah"],
@@ -415,7 +415,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1(abblah)", "test2(abblah)"],
@@ -437,7 +437,7 @@ describe("Dot-repeat", () => {
         await sendEscapeKey();
         await sendVSCodeKeys("0j");
 
-        await sendVSCodeKeys(".", 300);
+        await sendVSCodeKeys(".");
         await assertContent(
             {
                 content: ["test1blah", "test2blah"],

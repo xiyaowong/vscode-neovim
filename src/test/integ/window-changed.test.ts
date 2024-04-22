@@ -32,17 +32,17 @@ describe("handle window changed event", () => {
 
         const doc1 = await workspace.openTextDocument({ content: "text 1" });
         textEditor1 = await window.showTextDocument(doc1, ViewColumn.Active);
-        await wait(400);
+        await wait(200);
 
         const doc2 = await workspace.openTextDocument({ content: "text 2" });
         textEditor2 = await window.showTextDocument(doc2, ViewColumn.Two);
-        await wait(400);
+        await wait(200);
 
         const note = await workspace.openNotebookDocument(
             Uri.file(path.join(__dirname, "../../../test_fixtures/window-changed.ipynb")),
         );
         notebookEditor = await window.showNotebookDocument(note, { viewColumn: ViewColumn.Three });
-        await wait(400);
+        await wait(200);
 
         // Make sure the output editor is synchronized
         outputChannel = window.createOutputChannel("testing vscode neovim");
@@ -69,36 +69,36 @@ describe("handle window changed event", () => {
 
     it("text editor", async () => {
         setWin(findWinId("text 1"));
-        await wait(800);
+        await wait(200);
         assert.equal(window.activeTextEditor, textEditor1);
 
         setWin(findWinId("text 2"));
-        await wait(400);
+        await wait(200);
         assert.equal(window.activeTextEditor, textEditor2);
     });
 
     it("notebook", async () => {
         setWin(findWinId("cell 1"));
-        await wait(800);
+        await wait(200);
         assert.equal(window.activeNotebookEditor, notebookEditor);
         assert.equal(window.activeTextEditor!.document.getText(), "cell 1");
 
         setWin(findWinId("cell 2"));
-        await wait(400);
+        await wait(200);
         assert.equal(window.activeNotebookEditor, notebookEditor);
         assert.equal(window.activeTextEditor!.document.getText(), "cell 2");
     });
 
     it("output", async () => {
         setWin(findWinId("output"));
-        await wait(400);
+        await wait(200);
         assert.notEqual(window.activeTextEditor, undefined);
         assert.equal(window.activeTextEditor!.document.getText(), "output");
     });
 
     it("should ignore window change event when it isn't from neovim", async () => {
         await commands.executeCommand("workbench.action.openGlobalKeybindings");
-        await wait(400);
+        await wait(200);
         assert.equal(window.activeTextEditor, undefined);
         assert.equal(window.activeNotebookEditor, undefined);
     });

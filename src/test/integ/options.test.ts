@@ -46,7 +46,7 @@ describe("Synchronize editor options", () => {
         await wait(200);
 
         await client.command("set nu");
-        await wait(400);
+        await wait(200);
         assert.equal(editor.options.lineNumbers, vscode.TextEditorLineNumbersStyle.On);
 
         await client.command("set rnu");

@@ -106,7 +106,7 @@ describe("VSCode integration specific stuff", () => {
             client,
         );
 
-        await sendVSCodeKeys("L", 400);
+        await sendVSCodeKeys("L");
         visibleRange = editor.visibleRanges[0];
         const cursor = getVScodeCursor(editor);
         assert.ok(cursor[0] <= visibleRange.end.line && cursor[0] >= visibleRange.end.line - 1);
@@ -117,7 +117,7 @@ describe("VSCode integration specific stuff", () => {
             client,
         );
 
-        await sendVSCodeKeys("M", 400);
+        await sendVSCodeKeys("M");
         visibleRange = editor.visibleRanges[0];
         await assertContent(
             {
@@ -129,7 +129,7 @@ describe("VSCode integration specific stuff", () => {
         assert.ok(editor.selection.active.line >= middleline - 1);
         assert.ok(editor.selection.active.line <= middleline + 1);
 
-        await sendVSCodeKeys("H", 400);
+        await sendVSCodeKeys("H");
         visibleRange = editor.visibleRanges[0];
         await assertContent(
             {
@@ -242,8 +242,8 @@ describe("VSCode integration specific stuff", () => {
             client,
         );
         // make sure the changes will be synced with neovim
-        await sendVSCodeKeys("test", 500);
-        await sendVSCodeCommand("workbench.action.previousEditorInGroup", "", 500);
+        await sendVSCodeKeys("test");
+        await sendVSCodeCommand("workbench.action.previousEditorInGroup", "");
         await assertContent(
             {
                 content: ["blah1"],
@@ -262,7 +262,7 @@ describe("VSCode integration specific stuff", () => {
             client,
         );
 
-        await sendVSCodeCommand("workbench.action.nextEditorInGroup", "", 500);
+        await sendVSCodeCommand("workbench.action.nextEditorInGroup", "");
         await assertContent(
             {
                 content: ["testblah2"],
@@ -276,13 +276,13 @@ describe("VSCode integration specific stuff", () => {
     it("Cursor is ok when go to def into editor in the other pane", async () => {
         const doc1 = await vscode.workspace.openTextDocument(path.join(__dirname, "../../../test_fixtures/bb.ts"));
         await vscode.window.showTextDocument(doc1, vscode.ViewColumn.One);
-        await wait(1500);
+        await wait(1000);
 
         const doc2 = await vscode.workspace.openTextDocument(
             path.join(__dirname, "../../../test_fixtures/def-with-scroll.ts"),
         );
         await vscode.window.showTextDocument(doc2, vscode.ViewColumn.Two, true);
-        await wait(1500);
+        await wait(1000);
 
         // make sure we're in first editor group
         await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
@@ -296,7 +296,7 @@ describe("VSCode integration specific stuff", () => {
             doc1.uri,
             new vscode.Position(5, 1),
         );
-        await wait(1500);
+        await wait(1000);
 
         await assertContent(
             {
@@ -322,13 +322,12 @@ describe("VSCode integration specific stuff", () => {
         const doc = (
             await openTextDocument(path.join(__dirname, "../../../test_fixtures/cursor-preserved-between-columns.txt"))
         ).document;
-        await wait(1000);
-        await sendVSCodeKeys("gg050j", 1000);
+        await sendVSCodeKeys("gg050j");
         await vscode.window.showTextDocument(doc, vscode.ViewColumn.Two, false);
-        await wait(1000);
-        await sendVSCodeKeys("gg0100j", 1000);
+        await wait();
+        await sendVSCodeKeys("gg0100j");
 
-        await sendVSCodeCommand("workbench.action.focusFirstEditorGroup", "", 2000);
+        await sendVSCodeCommand("workbench.action.focusFirstEditorGroup", "");
         await sendVSCodeKeys("l");
         await assertContent(
             {
@@ -337,7 +336,7 @@ describe("VSCode integration specific stuff", () => {
             client,
         );
 
-        await sendVSCodeCommand("workbench.action.focusSecondEditorGroup", "", 1000);
+        await sendVSCodeCommand("workbench.action.focusSecondEditorGroup", "");
         await sendVSCodeKeys("l");
         await assertContent(
             {
@@ -355,8 +354,8 @@ describe("VSCode integration specific stuff", () => {
 
         await openTextDocument({ content: "blah" });
 
-        await sendVSCodeKeysAtomic(":e " + filePath, 500);
-        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "", 500);
+        await sendVSCodeKeysAtomic(":e " + filePath);
+        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "");
         await assertContent(
             {
                 content: ["line 1"],
@@ -419,7 +418,7 @@ describe("VSCode integration specific stuff", () => {
 
         const doc1 = await vscode.workspace.openTextDocument(path.join(__dirname, "../../../test_fixtures/bb.ts"));
         await vscode.window.showTextDocument(doc1, vscode.ViewColumn.One);
-        await wait(1500);
+        await wait(1000);
 
         const buf = await client.buffer;
         const type = await client.request("nvim_buf_get_option", [buf.id, "filetype"]);
@@ -443,7 +442,7 @@ describe("VSCode integration specific stuff", () => {
     it("Next search result works", async () => {
         await openTextDocument(path.join(__dirname, "../../../test_fixtures/incsearch-scroll.ts"));
 
-        await sendVSCodeCommand("workbench.action.findInFiles", { query: "blah" }, 500);
+        await sendVSCodeCommand("workbench.action.findInFiles", { query: "blah" });
         await sendVSCodeCommand("search.action.refreshSearchResults");
         await sendVSCodeCommand("workbench.action.focusFirstEditorGroup");
         await sendVSCodeCommand("search.action.focusNextSearchResult");
@@ -524,7 +523,7 @@ describe("VSCode integration specific stuff", () => {
     it("cursorMove with wrappedLine should works #1498", async () => {
         await openTextDocument({ content: "  hello\n\nworld" });
         await wait(200);
-        await sendNeovimKeys(client, "ll", 200);
+        await sendNeovimKeys(client, "ll");
         vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine" });
         await wait(200);
         vscode.commands.executeCommand("cursorMove", { to: "down", by: "wrappedLine" });

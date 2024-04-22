@@ -29,12 +29,12 @@ describe("Jumplist & jump actions & marks", () => {
         this.retries(3);
 
         await openTextDocument(path.join(__dirname, "../../../test_fixtures/b.ts"));
-        await wait(2000);
+        await wait(1000);
 
         await sendVSCodeKeys("jjjjjl");
-        await sendVSCodeKeys("gd", 2000);
+        await sendVSCodeKeys("gd", 1000);
 
-        await sendNeovimKeys(client, "<C-o>", 500);
+        await sendNeovimKeys(client, "<C-o>");
         await assertContent(
             {
                 cursor: [5, 1],
@@ -48,10 +48,10 @@ describe("Jumplist & jump actions & marks", () => {
         this.retries(3);
 
         await openTextDocument(path.join(__dirname, "../../../test_fixtures/go-to-def-same-file.ts"));
-        await wait(2000);
+        await wait(500);
 
-        await sendVSCodeKeys("gg049jgd", 2000);
-        await sendVSCodeKeys("jgd", 1000);
+        await sendVSCodeKeys("gg049jgd");
+        await sendVSCodeKeys("jgd");
         await assertContent(
             {
                 cursor: [4, 9],
@@ -77,14 +77,14 @@ describe("Jumplist & jump actions & marks", () => {
 
     it("lower-case marks should still exist after changes #543", async function () {
         const editor = await openTextDocument({ content: ["abc", "def", "uvw", "xyz"].join("\n") });
-        await wait(300);
+        await wait(200);
         await sendNeovimKeys(client, "maG");
         editor.edit((builder) => {
             builder.replace(new Position(0, 0), "ABC");
         });
-        await wait(300);
+        await wait(200);
         await sendNeovimKeys(client, "'a");
-        await wait(300);
+        await wait(200);
         await assertContent({ cursor: [0, 0] }, client, editor);
     });
 });

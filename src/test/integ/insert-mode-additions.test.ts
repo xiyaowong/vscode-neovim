@@ -67,7 +67,7 @@ describe("Simulated insert keys", () => {
         await sendEscapeKey();
 
         await sendInsertKey("o");
-        await sendVSCodeCommand("vscode-neovim.send", "<C-a>", 500);
+        await sendVSCodeCommand("vscode-neovim.send", "<C-a>");
 
         await sendEscapeKey();
         await assertContent(
@@ -86,7 +86,7 @@ describe("Simulated insert keys", () => {
         await sendInsertKey("o");
 
         await sendVSCodeCommand("vscode-neovim.send-blocking", "<C-r>");
-        await sendVSCodeKeys("y", 200);
+        await sendVSCodeKeys("y");
 
         await sendEscapeKey();
         await assertContent(

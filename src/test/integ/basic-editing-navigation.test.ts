@@ -290,7 +290,7 @@ describe("Basic editing and navigation", () => {
         );
 
         await sendEscapeKey();
-        await sendVSCodeKeys("jjj6lca{", 500);
+        await sendVSCodeKeys("jjj6lca{");
         await assertContent(
             {
                 vsCodeCursor: [3, 5],
@@ -363,7 +363,7 @@ describe("Basic editing and navigation", () => {
 
         await sendVSCodeKeys("yy800p");
 
-        await sendVSCodeKeys("G", 500);
+        await sendVSCodeKeys("G");
         await assertContent(
             {
                 cursor: [800, 0],
@@ -385,7 +385,7 @@ describe("Basic editing and navigation", () => {
             client,
         );
 
-        await sendVSCodeKeys("gg", 500);
+        await sendVSCodeKeys("gg");
         await assertContent(
             {
                 cursor: [0, 0],

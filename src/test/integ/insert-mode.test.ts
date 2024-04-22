@@ -415,7 +415,7 @@ describe("Insert mode and buffer synchronization", () => {
 
         await sendVSCodeKeys("ee");
         await assertContent({ cursor: [0, 10] }, client);
-        await sendVSCodeKeysAtomic("ciwtest", 500);
+        await sendVSCodeKeysAtomic("ciwtest");
 
         await assertContent(
             {
@@ -437,7 +437,7 @@ describe("Insert mode and buffer synchronization", () => {
         await sendVSCodeKeys("a3");
         await sendEscapeKey();
         await sendInsertKey("a");
-        await sendVSCodeCommand("vscode-neovim.send", "<C-a>", 500);
+        await sendVSCodeCommand("vscode-neovim.send", "<C-a>");
 
         await assertContent(
             {
@@ -453,7 +453,7 @@ describe("Insert mode and buffer synchronization", () => {
         await sendVSCodeKeys("ea blah2");
         await sendEscapeKey();
         await sendInsertKey("A");
-        await sendVSCodeCommand("vscode-neovim.send", "<C-a>", 500);
+        await sendVSCodeCommand("vscode-neovim.send", "<C-a>");
 
         await assertContent(
             {
@@ -469,7 +469,7 @@ describe("Insert mode and buffer synchronization", () => {
         await sendVSCodeKeys("wiblah2\n");
         await sendEscapeKey();
         await sendInsertKey("A");
-        await sendVSCodeCommand("vscode-neovim.send", "<C-a>", 500);
+        await sendVSCodeCommand("vscode-neovim.send", "<C-a>");
 
         await assertContent(
             {

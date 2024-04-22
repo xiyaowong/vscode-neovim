@@ -1,20 +1,19 @@
 import { strict as assert } from "assert";
 
-import vscode from "vscode";
 import { NeovimClient } from "neovim";
+import vscode from "vscode";
 
 import {
     attachTestNvimClient,
-    closeNvimClient,
-    closeAllActiveEditors,
     closeActiveEditor,
-    sendVSCodeKeys,
-    sendVSCodeCommand,
-    getVScodeCursor,
+    closeAllActiveEditors,
+    closeNvimClient,
     getNeovimCursor,
+    getVScodeCursor,
     openTextDocument,
+    sendVSCodeCommand,
+    sendVSCodeKeys,
     sendVSCodeKeysAtomic,
-    wait,
 } from "./integrationUtils";
 
 describe("Neovim external buffers", () => {
@@ -36,14 +35,14 @@ describe("Neovim external buffers", () => {
 
         await sendVSCodeKeys(":");
         await sendVSCodeCommand("vscode-neovim.test-cmdline", "help");
-        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "", 1000);
+        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "");
 
         const text = vscode.window.activeTextEditor!.document.getText();
         assert.ok(text.indexOf("NVIM DOCUMENTATION") !== -1);
 
         await sendVSCodeKeys(":");
         await sendVSCodeCommand("vscode-neovim.test-cmdline", "help options");
-        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "", 1000);
+        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "");
 
         const text2 = vscode.window.activeTextEditor!.document.getText();
         assert.ok(text2.indexOf("VIM REFERENCE MANUAL") !== -1);
@@ -55,10 +54,9 @@ describe("Neovim external buffers", () => {
         this.retries(3);
 
         await openTextDocument({ content: "blah" });
-        await wait(2000);
 
-        await sendVSCodeKeysAtomic(":help local-options", 500);
-        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "", 2000);
+        await sendVSCodeKeysAtomic(":help local-options");
+        await sendVSCodeCommand("vscode-neovim.commit-cmdline", "");
         await sendVSCodeKeys("$0");
 
         const vscodeCursor = getVScodeCursor();
