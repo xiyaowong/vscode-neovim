@@ -1,4 +1,7 @@
 {
+    "prettier.enable": true,
+    "eslint.enable": true,
+    "eslint.experimental.useFlatConfig": true,
     "[javascript]": {
         "editor.formatOnSave": false,
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -9,15 +12,14 @@
     },
     "editor.codeActionsOnSave": {
         "source.fixAll": "explicit",
-        "source.fixAll.eslint": "explicit"
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "never"
     },
-    "eslint.experimental.useFlatConfig": true,
     "files.exclude": {
-        "out": false // set this to true to hide the "out" folder with the compiled JS files
+        "out": false
     },
-    "prettier.enable": true,
     "search.exclude": {
-        "out": true // set this to false to include "out" folder in search results
+        "out": true
     },
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
     "typescript.tsc.autoDetect": "off",
