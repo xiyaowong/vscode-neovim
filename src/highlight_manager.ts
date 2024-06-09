@@ -35,7 +35,10 @@ export class HighlightManager implements Disposable {
 
     private getGrid(gridId: number): HighlightGrid {
         if (!this.highlightGrids.has(gridId)) {
-            this.highlightGrids.set(gridId, new HighlightGrid(this.groupStore));
+            this.highlightGrids.set(
+                gridId,
+                new HighlightGrid(gridId, this.groupStore, this.main.bufferManager, this.main.viewportManager),
+            );
         }
         return this.highlightGrids.get(gridId)!;
     }
@@ -63,9 +66,9 @@ export class HighlightManager implements Disposable {
                     break;
                 }
                 case "grid_scroll": {
-                    for (const [grid, , , , , by] of args) {
+                    for (const [grid, top, bottom, _left, _right, rows, _cols] of args) {
                         if (grid !== 1) {
-                            this.handleGridScroll(grid, by);
+                            this.handleGridScroll(grid, top, bottom, rows);
                             this.staleGrids.add(grid);
                         }
                     }
@@ -98,7 +101,7 @@ export class HighlightManager implements Disposable {
 
         for (const grid of this.staleGrids) {
             const editor = this.main.bufferManager.getEditorFromGridId(grid);
-            if (editor) this.getGrid(grid).refreshDecorations(editor);
+            if (editor) this.getGrid(grid).refreshDecorations();
         }
         this.staleGrids.clear();
     }
@@ -118,8 +121,8 @@ export class HighlightManager implements Disposable {
         this.getGrid(gridId).handleGridLine(drawLine, vimCol, cells);
     }
 
-    private handleGridScroll(grid: number, by: number): void {
-        this.getGrid(grid).scroll(by);
+    private handleGridScroll(grid: number, top: number, bottom: number, rows: number): void {
+        this.getGrid(grid).handleGridScroll(top, bottom, rows);
     }
 
     private handleChangeVisibleRanges(editor: TextEditor): void {
@@ -130,7 +133,7 @@ export class HighlightManager implements Disposable {
             const debounced = debounce(
                 (editor: TextEditor) => {
                     const gridId = this.main.bufferManager.getGridIdFromEditor(editor);
-                    if (gridId) this.getGrid(gridId).refreshDecorations(editor);
+                    if (gridId) this.getGrid(gridId).refreshDecorations();
                 },
                 VisibleRangesChangeDebounce,
                 { leading: false, trailing: true },

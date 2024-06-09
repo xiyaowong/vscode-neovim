@@ -446,6 +446,7 @@ describe("HighlightGrid.getLineHighlights", function () {
         if (testName !== "allows overlaying virtual text on an existing line") return;
         it(testName, () => {
             const grid = new HighlightGrid(
+                1, // arbitrary grid id
                 // fake the group store, only for testing
                 { normalizeHighlightId: (hlId) => hlId } as HighlightGroupStore,
             ) as any as THighlightGrid;
