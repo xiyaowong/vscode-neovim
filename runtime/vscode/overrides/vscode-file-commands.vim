@@ -34,6 +34,7 @@ command! -bang Find call VSCodeNotify('workbench.action.quickOpen')
 command! -complete=file -bang -nargs=? Write if <q-bang> ==# '!' | call VSCodeNotify('workbench.action.files.saveAs') | else | call VSCodeNotify('workbench.action.files.save') | endif
 command! -bang Saveas call VSCodeNotify('workbench.action.files.saveAs')
 
+"
 command! -bang Wall call VSCodeNotify('workbench.action.files.saveAll')
 command! -bang Quit if <q-bang> ==# '!' | call VSCodeNotify('workbench.action.revertAndCloseActiveEditor') | else | call VSCodeNotify('workbench.action.closeActiveEditor') | endif
 
@@ -50,7 +51,6 @@ AlterCommand ex Ex
 AlterCommand ene[w] Enew
 AlterCommand fin[d] Find
 AlterCommand sav[eas] Saveas
-AlterCommand wa[ll] Wall
 AlterCommand q[uit] Quit
 " TODO: Wq/Wqall need to be handled with the autocmd
 " Just putting "write" in saveAndClose doesn't work, because the writecmd is asynchronous
