@@ -1,4 +1,5 @@
 import { cloneDeep, findLast } from "lodash";
+import { TextDocument } from "vscode";
 
 import { Highlight, HighlightRange, LineCell, NormalHighlightRange, VimCell, VirtualHighlightRange } from "./types";
 import { CellIter, getWidth, isDouble, splitGraphemes } from "./util";
@@ -10,7 +11,7 @@ export class GridLineHandler {
     // line number -> line cells
     private lineCells: LineCell[][] = [];
 
-    handleGridLine(line: number, vimCol: number, cells: VimCell[]) {
+    handleGridLine(line: number, vimCol: number, cells: VimCell[], doc?: TextDocument) {
         const prevCells = this.lineCells[line] ?? [];
         // Fill in the missing cells
         if (prevCells.length < vimCol) {
@@ -30,10 +31,28 @@ export class GridLineHandler {
                 }
             }
         }
+
+        // console.log(Date.now(), line, "=>", JSON.stringify(cells));
+        // console.log(Date.now(), line, "=>", redrawCells.map((c) => c.text).join(""));
         const leftCells = prevCells.slice(0, vimCol);
         const rightCells = prevCells.slice(vimCol + redrawCells.length);
-
         this.lineCells[line] = [...leftCells, ...redrawCells, ...rightCells];
+
+        if (!doc || line < 0 || line >= doc.lineCount) return;
+        setTimeout(() => {
+            const lineText = doc.lineAt(line).text;
+            const drawLineText = this.lineCells[line]
+                .map((c) => c.text)
+                .join("")
+                .slice(0, lineText.length);
+            const compareText = lineText.slice(0, drawLineText.length);
+            if (drawLineText !== compareText) {
+                console.log(line, vimCol, JSON.stringify(cells));
+                // console.log(Date.now(), line, "=>", drawLineText, "=>", compareText);
+            }
+        }, 100);
+
+        // console.log(Date.now(), line, "=>", this.lineCells[line].map((c) => c.text).join(""));
     }
 
     lineHighlightsToRanges(line: number, highlights: Map<number, Highlight[]>): HighlightRange[] {

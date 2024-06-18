@@ -52,6 +52,10 @@ export class HighlightManager implements Disposable {
 
         await this.main.viewportManager.isSyncDone;
 
+        if (["grid_scroll", "grid_clear" /*  "grid_line" */].some((v) => name.includes(v))) {
+            console.log(name, JSON.stringify(args));
+        }
+
         try {
             switch (name) {
                 case "hl_attr_define": {

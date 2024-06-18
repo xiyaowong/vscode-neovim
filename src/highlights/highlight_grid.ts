@@ -54,7 +54,7 @@ export class HighlightGrid implements Disposable {
             }
             return cell;
         });
-        this.gridLineHandler.handleGridLine(line, vimCol, vimCells);
+        this.gridLineHandler.handleGridLine(line, vimCol, vimCells, this.editor?.document);
         this.lineDecorationsCache.delete(line);
         this.isDirty = true;
     }
