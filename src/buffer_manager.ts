@@ -463,6 +463,8 @@ export class BufferManager implements Disposable {
         //    documents that are not a real file (e.g. untitled, output, etc.)
         //    so we can just call them directly
 
+        console.log(`handleSaveBuf: ${buf}, ${bang}, ${current_name}, ${target_name}`);
+
         const document = this.getTextDocumentForBufferId(buf);
         if (document == null) {
             throw new Error(`Cannot save buffer ${buf} - ${target_name}`);
@@ -482,6 +484,8 @@ export class BufferManager implements Disposable {
         const currentPath = normalize(current_name);
         const targetPath = normalize(target_name);
 
+        console.log(`currentPath: ${currentPath}, targetPath: ${targetPath}`);
+
         if (currentPath === targetPath) {
             await workspace.save(docUri);
             return;
@@ -489,6 +493,8 @@ export class BufferManager implements Disposable {
 
         const vimCwd = normalize(await this.main.client.call("getcwd"));
         const relativePath = normalize(path.relative(vimCwd, targetPath));
+
+        console.log(`vimCwd: ${vimCwd}, relativePath: ${relativePath}`);
 
         if (relativePath === targetPath) {
             // Who wanna do this rare thing?
