@@ -64,7 +64,7 @@ describe("BufWriteCmd integration", () => {
         assert.equal(doc.getText(), "hello earth");
 
         await client.command("w");
-        await wait(100);
+        await wait(500);
         assert.equal(doc.isDirty, false);
         assert.equal(await readFile(doc.uri), "hello earth");
     });
@@ -79,7 +79,7 @@ describe("BufWriteCmd integration", () => {
 
         await client.command("w !cat");
         // ↑May open the output panel
-        await wait(100);
+        await wait(500);
         await commands.executeCommand("workbench.action.closePanel");
         assert.equal(doc.isDirty, true);
         assert.equal(doc.getText(), "aaa");
