@@ -1,5 +1,4 @@
 import { strict as assert } from "assert";
-import os from "os";
 import path from "path";
 
 import { NeovimClient } from "neovim";
@@ -26,7 +25,7 @@ describe("BufWriteCmd integration", () => {
     };
 
     const openTestFile = async () => {
-        const uri = Uri.file(path.join(os.tmpdir(), Math.random().toString(36).substring(7)));
+        const uri = Uri.file(path.join(process.cwd(), Math.random().toString(36).substring(7)));
         testFiles.push(uri);
         await workspace.fs.writeFile(uri, new TextEncoder().encode("hello world"));
         const doc = await workspace.openTextDocument(uri);
