@@ -57,6 +57,11 @@ describe("BufWriteCmd integration", () => {
 
     it("Save", async () => {
         const doc = await openTestFile();
+        console.log("---------------");
+        console.log(await client.call("bufname", []));
+        console.log(await client.call("getcwd", []));
+        console.log(doc.uri.toString());
+        console.log("---------------");
 
         await sendVSCodeKeys("cchello earth");
         await sendEscapeKey();
