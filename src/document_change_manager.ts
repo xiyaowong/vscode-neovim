@@ -121,11 +121,7 @@ export class DocumentChangeManager implements Disposable {
         const deletes = this.dotRepeatChange.rangeLength;
         this.dotRepeatChange = undefined;
         if (!edits.length && !deletes) return;
-        try {
-            await actions.lua("dotrepeat_sync", edits, deletes);
-        } finally {
-            await actions.lua("dotrepeat_restore", edits, deletes);
-        }
+        await actions.lua("dotrepeat_sync", edits, deletes);
     }
 
     private onBufferInit: BufferManager["onBufferInit"] = (id, doc) => {

@@ -87,43 +87,33 @@ function M.handle_changes(bufnr, changes)
   return api.nvim_buf_get_changedtick(bufnr)
 end
 
-do
-  --- Replay changes for dotrepeat ---
+--- Replay changes for dotrepeat ---
+---@param edits string
+---@param deletes number
+function M.dotrepeat_sync(edits, deletes)
+  local ei = vim.o.ei
+  vim.o.ei = "all"
 
-  local _curr_win, _temp_buf, _temp_win
-
-  ---@param edits string
-  ---@param deletes number
-  function M.dotrepeat_sync(edits, deletes)
-    local ei = vim.opt.ei:get()
-    vim.opt.ei = "all"
-
-    _curr_win = api.nvim_get_current_win()
-    _temp_buf = api.nvim_create_buf(false, true)
-    _temp_win = api.nvim_open_win(_temp_buf, true, { external = true, width = 100, height = 50 })
-
-    if deletes > 0 then
-      api.nvim_buf_set_lines(_temp_buf, 0, -1, false, { ("x"):rep(deletes) })
-      api.nvim_win_set_cursor(_temp_win, { 1, deletes })
-      local bs = ("<BS>"):rep(deletes)
-      bs = api.nvim_replace_termcodes(bs, true, true, true)
-      api.nvim_feedkeys(bs, "n", false)
-    end
-    api.nvim_feedkeys(edits, "n", true)
-
-    vim.opt.ei = ei
+  -- Sync
+  local curr_win = api.nvim_get_current_win()
+  local temp_buf = api.nvim_create_buf(false, true)
+  local temp_win = api.nvim_open_win(temp_buf, true, { external = true, width = 100, height = 50 })
+  if deletes > 0 then
+    api.nvim_buf_set_lines(temp_buf, 0, -1, false, { ("x"):rep(deletes) })
+    api.nvim_win_set_cursor(temp_win, { 1, deletes })
+    local bs = ("<BS>"):rep(deletes)
+    bs = api.nvim_replace_termcodes(bs, true, true, true)
+    api.nvim_feedkeys(bs, "n", false)
   end
+  api.nvim_feedkeys(edits, "n", true)
+  api.nvim_feedkeys("", "x", false)
 
-  function M.dotrepeat_restore()
-    local ei = vim.opt.ei:get()
-    vim.opt.ei = "all"
+  -- Restore window
+  api.nvim_set_current_win(curr_win)
+  pcall(api.nvim_win_close, temp_win, true)
+  pcall(api.nvim_buf_delete, temp_win, { force = true })
 
-    api.nvim_set_current_win(_curr_win)
-    pcall(api.nvim_win_close, _temp_win, true)
-    pcall(api.nvim_buf_delete, _temp_buf, { force = true })
-
-    vim.opt.ei = ei
-  end
+  vim.o.ei = ei
 end
 
 ---Get editor's selections
