@@ -4,6 +4,7 @@ import { NeovimClient } from "neovim";
 import vscode, { DecorationOptions, Position, TextEditor } from "vscode";
 
 import {
+    assertContent,
     attachTestNvimClient,
     closeAllActiveEditors,
     closeNvimClient,
@@ -102,6 +103,7 @@ describe("Test highlights", () => {
         });
 
         await wait(1000);
+        await assertContent({ content: ["hello", " ".repeat(3000), "world", " ".repeat(1000)] }, client);
         await sendEscapeKey();
         await sendNeovimKeys(client, "/orl");
         await wait(1000);
