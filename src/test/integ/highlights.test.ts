@@ -107,6 +107,9 @@ describe("Test highlights", () => {
         await wait(1000);
         assert(stubTextEditor.decorationOptionsList.length > 0);
         const decoration = stubTextEditor.decorationOptionsList[0][0] as DecorationOptions;
+        const range = decoration.range;
+        const full = [range.start.line, range.start.character, range.end.line, range.end.character];
+        assert.strictEqual(full, [0, 3006, 0, 3009]);
         assert.ok(decoration.range.isEqual(new vscode.Range(0, 3006, 0, 3009)));
     });
 });
