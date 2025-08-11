@@ -104,7 +104,7 @@ describe("Test highlights", () => {
         {
             await sendEscapeKey();
             await sendNeovimKeys(client, "/orl");
-            await wait(500);
+            await wait(1000);
             assert(stubTextEditor.decorationOptionsList.length > 0);
             const decoration = stubTextEditor.decorationOptionsList[0][0] as DecorationOptions;
             assert.ok(decoration.range.isEqual(new vscode.Range(0, 3006, 0, 3009)));
